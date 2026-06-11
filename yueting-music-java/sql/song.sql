@@ -1,0 +1,21 @@
+-- 歌曲信息表
+CREATE TABLE `song` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `name`        VARCHAR(200) NOT NULL                COMMENT '歌曲名称',
+    `singer_id`   BIGINT       DEFAULT NULL             COMMENT '歌手ID，关联 singer 表',
+    `cover`       VARCHAR(500) DEFAULT NULL             COMMENT '封面图URL',
+    `url`         VARCHAR(500) DEFAULT NULL             COMMENT '歌曲文件URL',
+    `music_type`  VARCHAR(50)  DEFAULT NULL             COMMENT '音乐类型，关联字典 music_type',
+    `music_style` VARCHAR(50)  DEFAULT NULL             COMMENT '音乐风格，关联字典 music_style',
+    `duration`    INT          DEFAULT NULL             COMMENT '时长（秒）',
+    `lyric`       TEXT         DEFAULT NULL             COMMENT '歌词',
+    `status`      TINYINT      NOT NULL DEFAULT 1      COMMENT '状态：0-下架 1-上架',
+    `remark`      VARCHAR(255) DEFAULT NULL             COMMENT '备注',
+    `sort_order`  INT          NOT NULL DEFAULT 0      COMMENT '排序',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_singer_id` (`singer_id`),
+    KEY `idx_music_type` (`music_type`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='歌曲信息表';

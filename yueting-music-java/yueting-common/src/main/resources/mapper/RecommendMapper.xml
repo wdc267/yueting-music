@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.RecommendMapper">
+  <resultMap id="BaseResultMap" type="com.yueting.entity.po.Recommend">
+    <id column="id" property="id"/>
+    <result column="title" property="title"/><result column="cover" property="cover"/>
+    <result column="resource_type" property="resourceType"/><result column="resource_id" property="resourceId"/>
+    <result column="recommend_type" property="recommendType"/>
+    <result column="status" property="status"/><result column="sort_order" property="sortOrder"/>
+    <result column="create_time" property="createTime"/><result column="update_time" property="updateTime"/>
+  </resultMap>
+  <sql id="BaseColumns">id,title,cover,resource_type,resource_id,recommend_type,status,sort_order,create_time,update_time</sql>
+  <select id="selectList" resultMap="BaseResultMap">
+    SELECT r.id,r.title,r.cover,r.resource_type,r.resource_id,r.recommend_type,r.status,r.sort_order,r.create_time,r.update_time,
+           CASE
+             WHEN r.resource_type = 'singer' THEN (SELECT name FROM singer WHERE id = r.resource_id)
+             WHEN r.resource_type = 'song' THEN (SELECT name FROM song WHERE id = r.resource_id)
+             WHEN r.resource_type = 'playlist' THEN (SELECT name FROM playlist WHERE id = r.resource_id)
+           END AS resource_name,
+           CASE
+             WHEN r.resource_type = 'singer' THEN (SELECT avatar FROM singer WHERE id = r.resource_id)
+             WHEN r.resource_type = 'song' THEN (SELECT cover FROM song WHERE id = r.resource_id)
+             WHEN r.resource_type = 'playlist' THEN (SELECT cover FROM playlist WHERE id = r.resource_id)
+           END AS resource_cover
+    FROM recommend r
+    <where>
+      <if test="recommendType != null and recommendType != ''">AND r.recommend_type = #{recommendType}</if>
+      <if test="resourceType != null and resourceType != ''">AND r.resource_type = #{resourceType}</if>
+      <if test="status != null">AND r.status = #{status}</if>
+    </where> ORDER BY r.sort_order ASC, r.create_time DESC
+  </select>
+  <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="BaseColumns"/> FROM recommend WHERE id = #{id}</select>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO recommend (title,cover,resource_type,resource_id,recommend_type,status,sort_order)
+    VALUES (#{title},#{cover},#{resourceType},#{resourceId},#{recommendType},#{status},#{sortOrder})
+  </insert>
+  <update id="update">UPDATE recommend <set>
+    <if test="title != null">title = #{title},</if>
+    <if test="cover != null">cover = #{cover},</if>
+    <if test="resourceType != null">resource_type = #{resourceType},</if>
+    <if test="resourceId != null">resource_id = #{resourceId},</if>
+    <if test="recommendType != null">recommend_type = #{recommendType},</if>
+    <if test="status != null">status = #{status},</if>
+    <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+  </set> WHERE id = #{id}</update>
+  <delete id="deleteById">DELETE FROM recommend WHERE id = #{id}</delete>
+</mapper>

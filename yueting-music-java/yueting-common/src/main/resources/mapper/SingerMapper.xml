@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.SingerMapper">
+  <resultMap id="BaseResultMap" type="com.yueting.entity.po.Singer">
+    <id column="id" property="id"/>
+    <result column="name" property="name"/><result column="avatar" property="avatar"/>
+    <result column="region" property="region"/><result column="status" property="status"/>
+    <result column="remark" property="remark"/><result column="sort_order" property="sortOrder"/>
+    <result column="create_time" property="createTime"/><result column="update_time" property="updateTime"/>
+  </resultMap>
+  <sql id="BaseColumns">id,name,avatar,region,status,remark,sort_order,create_time,update_time</sql>
+  <select id="selectList" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/> FROM singer
+    <where>
+      <if test="name != null and name != ''">AND name LIKE CONCAT('%',#{name},'%')</if>
+      <if test="region != null and region != ''">AND region = #{region}</if>
+      <if test="status != null">AND status = #{status}</if>
+    </where> ORDER BY sort_order ASC, create_time DESC
+  </select>
+  <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="BaseColumns"/> FROM singer WHERE id = #{id}</select>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO singer (name,avatar,region,status,remark,sort_order) VALUES (#{name},#{avatar},#{region},#{status},#{remark},#{sortOrder})
+  </insert>
+  <update id="update">UPDATE singer <set>
+    <if test="name != null">name = #{name},</if>
+    <if test="avatar != null">avatar = #{avatar},</if>
+    <if test="region != null">region = #{region},</if>
+    <if test="status != null">status = #{status},</if>
+    <if test="remark != null">remark = #{remark},</if>
+    <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+  </set> WHERE id = #{id}</update>
+  <delete id="deleteById">DELETE FROM singer WHERE id = #{id}</delete>
+  <update id="updateSort">UPDATE singer SET sort_order = #{sortOrder} WHERE id = #{id}</update>
+</mapper>

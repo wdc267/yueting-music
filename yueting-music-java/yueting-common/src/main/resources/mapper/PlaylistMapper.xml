@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.PlaylistMapper">
+  <resultMap id="BaseResultMap" type="com.yueting.entity.po.Playlist">
+    <id column="id" property="id"/>
+    <result column="name" property="name"/><result column="cover" property="cover"/>
+    <result column="description" property="description"/><result column="status" property="status"/>
+    <result column="sort_order" property="sortOrder"/>
+    <result column="song_count" property="songCount"/>
+    <result column="create_time" property="createTime"/><result column="update_time" property="updateTime"/>
+  </resultMap>
+  <sql id="BaseColumns">p.id,p.name,p.cover,p.description,p.status,p.sort_order,p.create_time,p.update_time</sql>
+  <select id="selectList" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/>,
+           (SELECT COUNT(*) FROM playlist_song WHERE playlist_id = p.id) AS song_count
+    FROM playlist p
+    <where>
+      <if test="name != null and name != ''">AND p.name LIKE CONCAT('%',#{name},'%')</if>
+      <if test="status != null">AND p.status = #{status}</if>
+    </where> ORDER BY p.sort_order ASC, p.create_time DESC
+  </select>
+  <select id="selectById" resultMap="BaseResultMap">SELECT p.id,p.name,p.cover,p.description,p.status,p.sort_order,p.create_time,p.update_time FROM playlist p WHERE p.id = #{id}</select>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO playlist (name,cover,description,status,sort_order) VALUES (#{name},#{cover},#{description},#{status},#{sortOrder})
+  </insert>
+  <update id="update">UPDATE playlist <set>
+    <if test="name != null">name = #{name},</if>
+    <if test="cover != null">cover = #{cover},</if>
+    <if test="description != null">description = #{description},</if>
+    <if test="status != null">status = #{status},</if>
+    <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+  </set> WHERE id = #{id}</update>
+  <delete id="deleteById">DELETE FROM playlist WHERE id = #{id}</delete>
+  <select id="selectSongsByPlaylistId" resultType="com.yueting.entity.po.PlaylistSong">
+    SELECT id, playlist_id AS playlistId, song_id AS songId, sort_order AS sortOrder FROM playlist_song WHERE playlist_id = #{playlistId} ORDER BY sort_order ASC
+  </select>
+  <insert id="insertPlaylistSong">INSERT INTO playlist_song (playlist_id,song_id,sort_order) VALUES (#{playlistId},#{songId},#{sortOrder})</insert>
+  <delete id="deleteSongsByPlaylistId">DELETE FROM playlist_song WHERE playlist_id = #{playlistId}</delete>
+</mapper>

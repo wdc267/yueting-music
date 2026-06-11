@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.SongMapper">
+  <resultMap id="BaseResultMap" type="com.yueting.entity.po.Song">
+    <id column="id" property="id"/>
+    <result column="name" property="name"/><result column="singer_id" property="singerId"/>
+    <result column="cover" property="cover"/><result column="url" property="url"/>
+    <result column="music_type" property="musicType"/><result column="music_style" property="musicStyle"/>
+    <result column="duration" property="duration"/><result column="lyric" property="lyric"/>
+    <result column="play_count" property="playCount"/><result column="like_count" property="likeCount"/>
+    <result column="fav_count" property="favCount"/>
+    <result column="status" property="status"/><result column="remark" property="remark"/>
+    <result column="sort_order" property="sortOrder"/>
+    <result column="create_time" property="createTime"/><result column="update_time" property="updateTime"/>
+  </resultMap>
+  <sql id="BaseColumns">id,name,singer_id,cover,url,music_type,music_style,duration,lyric,play_count,like_count,fav_count,status,remark,sort_order,create_time,update_time</sql>
+  <select id="selectList" resultMap="BaseResultMap">
+    SELECT s.id,s.name,s.singer_id,s.cover,s.url,s.music_type,s.music_style,s.duration,s.lyric,s.play_count,s.like_count,s.fav_count,s.status,s.remark,s.sort_order,s.create_time,s.update_time,
+           si.name AS singer_name
+    FROM song s LEFT JOIN singer si ON s.singer_id = si.id
+    <where>
+      <if test="name != null and name != ''">AND s.name LIKE CONCAT('%',#{name},'%')</if>
+      <if test="singerId != null">AND s.singer_id = #{singerId}</if>
+      <if test="musicType != null and musicType != ''">AND s.music_type = #{musicType}</if>
+      <if test="status != null">AND s.status = #{status}</if>
+    </where> ORDER BY s.sort_order ASC, s.create_time DESC
+  </select>
+  <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="BaseColumns"/> FROM song WHERE id = #{id}</select>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO song (name,singer_id,cover,url,music_type,music_style,duration,lyric,status,remark,sort_order)
+    VALUES (#{name},#{singerId},#{cover},#{url},#{musicType},#{musicStyle},#{duration},#{lyric},#{status},#{remark},#{sortOrder})
+  </insert>
+  <update id="update">UPDATE song <set>
+    <if test="name != null">name = #{name},</if>
+    <if test="singerId != null">singer_id = #{singerId},</if>
+    <if test="cover != null">cover = #{cover},</if>
+    <if test="url != null">url = #{url},</if>
+    <if test="musicType != null">music_type = #{musicType},</if>
+    <if test="musicStyle != null">music_style = #{musicStyle},</if>
+    <if test="duration != null">duration = #{duration},</if>
+    <if test="lyric != null">lyric = #{lyric},</if>
+    <if test="playCount != null">play_count = #{playCount},</if>
+    <if test="likeCount != null">like_count = #{likeCount},</if>
+    <if test="favCount != null">fav_count = #{favCount},</if>
+    <if test="status != null">status = #{status},</if>
+    <if test="remark != null">remark = #{remark},</if>
+    <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+  </set> WHERE id = #{id}</update>
+  <delete id="deleteById">DELETE FROM song WHERE id = #{id}</delete>
+</mapper>
