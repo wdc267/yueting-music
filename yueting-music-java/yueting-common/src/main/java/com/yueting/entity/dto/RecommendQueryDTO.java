@@ -5,4 +5,5 @@ public class RecommendQueryDTO {
   private String recommendType;
   private String resourceType;
   private Integer status;
+  private String sortBy;
 }

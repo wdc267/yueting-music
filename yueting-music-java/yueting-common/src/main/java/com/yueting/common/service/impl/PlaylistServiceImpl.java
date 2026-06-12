@@ -1,6 +1,6 @@
 package com.yueting.common.service.impl;
+
 import com.yueting.common.mapper.PlaylistMapper;
-import com.yueting.common.mapper.SongMapper;
 import com.yueting.common.service.PlaylistService;
 import com.yueting.entity.dto.PlaylistQueryDTO;
 import com.yueting.entity.dto.PlaylistSaveDTO;
@@ -11,17 +11,17 @@ import com.yueting.entity.vo.SongVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 public class PlaylistServiceImpl implements PlaylistService {
   private final PlaylistMapper playlistMapper;
   public PlaylistServiceImpl(PlaylistMapper playlistMapper) { this.playlistMapper = playlistMapper; }
-  @Override
-  public List<PlaylistVO> selectList(PlaylistQueryDTO query) {
-    return playlistMapper.selectList(query).stream().map(this::toVO).collect(Collectors.toList());
-  }
+
+  @Override public List<PlaylistVO> selectList(PlaylistQueryDTO query) { return playlistMapper.selectList(query).stream().map(this::toVO).collect(Collectors.toList()); }
+  @Override public List<PlaylistVO> selectEnabledList() { return playlistMapper.selectEnabledList().stream().map(this::toVO).collect(Collectors.toList()); }
+
   @Override
   public PlaylistVO getById(Long id) {
     Playlist p = playlistMapper.selectById(id);
@@ -32,6 +32,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     vo.setSongCount(psList.size());
     return vo;
   }
+
   @Override @Transactional
   public void save(PlaylistSaveDTO dto) {
     Playlist p = new Playlist(); BeanUtils.copyProperties(dto, p);
@@ -43,6 +44,7 @@ public class PlaylistServiceImpl implements PlaylistService {
       }
     }
   }
+
   @Override @Transactional
   public void update(PlaylistSaveDTO dto) {
     Playlist p = new Playlist(); BeanUtils.copyProperties(dto, p);
@@ -55,7 +57,8 @@ public class PlaylistServiceImpl implements PlaylistService {
       }
     }
   }
-  @Override @Transactional
-  public void delete(Long id) { playlistMapper.deleteSongsByPlaylistId(id); playlistMapper.deleteById(id); }
+
+  @Override @Transactional public void delete(Long id) { playlistMapper.deleteSongsByPlaylistId(id); playlistMapper.deleteById(id); }
+
   private PlaylistVO toVO(Playlist p) { PlaylistVO vo = new PlaylistVO(); BeanUtils.copyProperties(p, vo); return vo; }
 }

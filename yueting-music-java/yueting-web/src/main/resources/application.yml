@@ -22,7 +22,7 @@ mybatis:
     map-underscore-to-camel-case: true
 #项目目录
 project:
-  folder: C:/webser/
+  folder: D:/yueting-upload/
 
 #日志级别
 log:

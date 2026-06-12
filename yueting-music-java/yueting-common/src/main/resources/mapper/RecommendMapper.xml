@@ -5,6 +5,10 @@
     <id column="id" property="id"/>
     <result column="title" property="title"/><result column="cover" property="cover"/>
     <result column="resource_type" property="resourceType"/><result column="resource_id" property="resourceId"/>
+    <result column="resource_name" property="resourceName"/><result column="resource_cover" property="resourceCover"/>
+    <result column="resource_url" property="resourceUrl"/>
+    <result column="play_count" property="playCount"/><result column="like_count" property="likeCount"/>
+    <result column="fav_count" property="favCount"/>
     <result column="recommend_type" property="recommendType"/>
     <result column="status" property="status"/><result column="sort_order" property="sortOrder"/>
     <result column="create_time" property="createTime"/><result column="update_time" property="updateTime"/>
@@ -21,13 +25,56 @@
              WHEN r.resource_type = 'singer' THEN (SELECT avatar FROM singer WHERE id = r.resource_id)
              WHEN r.resource_type = 'song' THEN (SELECT cover FROM song WHERE id = r.resource_id)
              WHEN r.resource_type = 'playlist' THEN (SELECT cover FROM playlist WHERE id = r.resource_id)
-           END AS resource_cover
+           END AS resource_cover,
+           CASE
+             WHEN r.resource_type = 'singer' THEN (SELECT url FROM song WHERE singer_id = r.resource_id AND status = 1 ORDER BY play_count DESC, sort_order ASC, create_time DESC LIMIT 1)
+             WHEN r.resource_type = 'song' THEN (SELECT url FROM song WHERE id = r.resource_id)
+             WHEN r.resource_type = 'playlist' THEN (
+               SELECT s.url FROM playlist_song ps
+               INNER JOIN song s ON s.id = ps.song_id
+               WHERE ps.playlist_id = r.resource_id AND s.status = 1
+               ORDER BY ps.sort_order ASC, s.play_count DESC, s.create_time DESC LIMIT 1
+             )
+           END AS resource_url,
+           CASE
+             WHEN r.resource_type = 'singer' THEN COALESCE((SELECT SUM(play_count) FROM song WHERE singer_id = r.resource_id AND status = 1), 0)
+             WHEN r.resource_type = 'song' THEN COALESCE((SELECT play_count FROM song WHERE id = r.resource_id), 0)
+             WHEN r.resource_type = 'playlist' THEN COALESCE((
+               SELECT SUM(s.play_count) FROM playlist_song ps
+               INNER JOIN song s ON s.id = ps.song_id
+               WHERE ps.playlist_id = r.resource_id AND s.status = 1
+             ), 0)
+           END AS play_count,
+           CASE
+             WHEN r.resource_type = 'singer' THEN COALESCE((SELECT SUM(like_count) FROM song WHERE singer_id = r.resource_id AND status = 1), 0)
+             WHEN r.resource_type = 'song' THEN COALESCE((SELECT like_count FROM song WHERE id = r.resource_id), 0)
+             WHEN r.resource_type = 'playlist' THEN COALESCE((
+               SELECT SUM(s.like_count) FROM playlist_song ps
+               INNER JOIN song s ON s.id = ps.song_id
+               WHERE ps.playlist_id = r.resource_id AND s.status = 1
+             ), 0)
+           END AS like_count,
+           CASE
+             WHEN r.resource_type = 'singer' THEN COALESCE((SELECT SUM(fav_count) FROM song WHERE singer_id = r.resource_id AND status = 1), 0)
+             WHEN r.resource_type = 'song' THEN COALESCE((SELECT fav_count FROM song WHERE id = r.resource_id), 0)
+             WHEN r.resource_type = 'playlist' THEN COALESCE((
+               SELECT SUM(s.fav_count) FROM playlist_song ps
+               INNER JOIN song s ON s.id = ps.song_id
+               WHERE ps.playlist_id = r.resource_id AND s.status = 1
+             ), 0)
+           END AS fav_count
     FROM recommend r
     <where>
       <if test="recommendType != null and recommendType != ''">AND r.recommend_type = #{recommendType}</if>
       <if test="resourceType != null and resourceType != ''">AND r.resource_type = #{resourceType}</if>
       <if test="status != null">AND r.status = #{status}</if>
-    </where> ORDER BY r.sort_order ASC, r.create_time DESC
+    </where>
+    <choose>
+      <when test="sortBy == 'likeCount'">ORDER BY like_count DESC, r.sort_order ASC, r.create_time DESC</when>
+      <when test="sortBy == 'favCount'">ORDER BY fav_count DESC, r.sort_order ASC, r.create_time DESC</when>
+      <when test="sortBy == 'playCount'">ORDER BY play_count DESC, r.sort_order ASC, r.create_time DESC</when>
+      <otherwise>ORDER BY r.sort_order ASC, r.create_time DESC</otherwise>
+    </choose>
   </select>
   <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="BaseColumns"/> FROM recommend WHERE id = #{id}</select>
   <insert id="insert" useGeneratedKeys="true" keyProperty="id">

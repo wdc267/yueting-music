@@ -13,10 +13,9 @@
     <result column="sort_order" property="sortOrder"/>
     <result column="create_time" property="createTime"/><result column="update_time" property="updateTime"/>
   </resultMap>
-  <sql id="BaseColumns">id,name,singer_id,cover,url,music_type,music_style,duration,lyric,play_count,like_count,fav_count,status,remark,sort_order,create_time,update_time</sql>
+  <sql id="BaseColumns">s.id,s.name,s.singer_id,s.cover,s.url,s.music_type,s.music_style,s.duration,s.lyric,s.play_count,s.like_count,s.fav_count,s.status,s.remark,s.sort_order,s.create_time,s.update_time</sql>
   <select id="selectList" resultMap="BaseResultMap">
-    SELECT s.id,s.name,s.singer_id,s.cover,s.url,s.music_type,s.music_style,s.duration,s.lyric,s.play_count,s.like_count,s.fav_count,s.status,s.remark,s.sort_order,s.create_time,s.update_time,
-           si.name AS singer_name
+    SELECT <include refid="BaseColumns"/>, si.name AS singer_name
     FROM song s LEFT JOIN singer si ON s.singer_id = si.id
     <where>
       <if test="name != null and name != ''">AND s.name LIKE CONCAT('%',#{name},'%')</if>
@@ -25,7 +24,12 @@
       <if test="status != null">AND s.status = #{status}</if>
     </where> ORDER BY s.sort_order ASC, s.create_time DESC
   </select>
-  <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="BaseColumns"/> FROM song WHERE id = #{id}</select>
+  <select id="selectEnabledList" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/>, si.name AS singer_name
+    FROM song s LEFT JOIN singer si ON s.singer_id = si.id
+    WHERE s.status = 1 ORDER BY s.sort_order ASC, s.create_time DESC
+  </select>
+  <select id="selectById" resultMap="BaseResultMap">SELECT <include refid="BaseColumns"/> FROM song s WHERE s.id = #{id}</select>
   <insert id="insert" useGeneratedKeys="true" keyProperty="id">
     INSERT INTO song (name,singer_id,cover,url,music_type,music_style,duration,lyric,status,remark,sort_order)
     VALUES (#{name},#{singerId},#{cover},#{url},#{musicType},#{musicStyle},#{duration},#{lyric},#{status},#{remark},#{sortOrder})

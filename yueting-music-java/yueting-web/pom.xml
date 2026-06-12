@@ -28,7 +28,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.yueting.yuetingWebApplication</mainClass>
+                    <mainClass>com.yueting.YuetingWebApplication</mainClass>
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
             </plugin>

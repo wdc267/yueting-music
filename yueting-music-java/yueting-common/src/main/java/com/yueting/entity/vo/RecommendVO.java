@@ -10,6 +10,10 @@ public class RecommendVO {
   private Long resourceId;
   private String resourceName;
   private String resourceCover;
+  private String resourceUrl;
+  private Integer playCount;
+  private Integer likeCount;
+  private Integer favCount;
   private String recommendType;
   private Integer status;
   private Integer sortOrder;

@@ -1,4 +1,5 @@
 package com.yueting.common.service.impl;
+
 import com.yueting.common.mapper.SongMapper;
 import com.yueting.common.service.SongService;
 import com.yueting.entity.dto.SongQueryDTO;
@@ -12,20 +13,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 public class SongServiceImpl implements SongService {
   private final SongMapper songMapper;
   private final SingerMapper singerMapper;
   public SongServiceImpl(SongMapper songMapper, SingerMapper singerMapper) { this.songMapper = songMapper; this.singerMapper = singerMapper; }
+
   @Override
   public List<SongVO> selectList(SongQueryDTO query) {
-    List<Song> list = songMapper.selectList(query);
-    return list.stream().map(s -> {
+    return songMapper.selectList(query).stream().map(s -> {
       SongVO vo = toVO(s);
       if (s.getSingerId() != null) { Singer singer = singerMapper.selectById(s.getSingerId()); if (singer != null) vo.setSingerName(singer.getName()); }
       return vo;
     }).collect(Collectors.toList());
   }
+
+  @Override
+  public List<SongVO> selectEnabledList() {
+    return songMapper.selectEnabledList().stream().map(this::toVO).collect(Collectors.toList());
+  }
+
   @Override
   public SongVO getById(Long id) {
     Song s = songMapper.selectById(id);
@@ -34,11 +42,10 @@ public class SongServiceImpl implements SongService {
     if (s.getSingerId() != null) { Singer singer = singerMapper.selectById(s.getSingerId()); if (singer != null) vo.setSingerName(singer.getName()); }
     return vo;
   }
-  @Override @Transactional
-  public void save(SongSaveDTO dto) { Song song = new Song(); BeanUtils.copyProperties(dto, song); songMapper.insert(song); }
-  @Override @Transactional
-  public void update(SongSaveDTO dto) { Song song = new Song(); BeanUtils.copyProperties(dto, song); songMapper.update(song); }
-  @Override @Transactional
-  public void delete(Long id) { songMapper.deleteById(id); }
+
+  @Override @Transactional public void save(SongSaveDTO dto) { Song song = new Song(); BeanUtils.copyProperties(dto, song); songMapper.insert(song); }
+  @Override @Transactional public void update(SongSaveDTO dto) { Song song = new Song(); BeanUtils.copyProperties(dto, song); songMapper.update(song); }
+  @Override @Transactional public void delete(Long id) { songMapper.deleteById(id); }
+
   private SongVO toVO(Song s) { SongVO vo = new SongVO(); BeanUtils.copyProperties(s, vo); return vo; }
 }
