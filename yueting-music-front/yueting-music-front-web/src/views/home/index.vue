@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getHomeData } from '@/api/recommend'
+import { toggleLike, toggleFavorite, getLikeStatus, getFavoriteStatus } from '@/api/user'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
@@ -18,6 +19,8 @@ const router = useRouter()
 
 const userInfo = computed(() => { try { const info = localStorage.getItem('user_info'); return info ? JSON.parse(info) : null } catch { return null } })
 const isLoggedIn = computed(() => !!userInfo.value)
+const likedMap = ref({})
+const favoritedMap = ref({})
 
 async function fetchData() {
   loading.value = true
@@ -44,6 +47,39 @@ function normalizeMediaUrl(url) {
 function getCover(item) { return normalizeMediaUrl(item.cover || item.resourceCover || item.avatar || '') }
 function handleImageError(e) { e.target.onerror = null; e.target.style.display = 'none' }
 function formatCount(n) { if (!n && n !== 0) return ''; if (n > 9999) return (n / 10000).toFixed(1) + '万'; return n }
+async function handleLike(item, type) {
+  if (!isLoggedIn.value) { ElMessage.warning('请先登录'); return }
+  const key = type + '-' + item.id
+  const res = await toggleLike({ userId: userInfo.value.id, resourceType: type, resourceId: item.id })
+  likedMap.value[key] = res.data.liked
+  if (res.data.count !== undefined) item.likeCount = res.data.count
+}
+
+async function handleFavorite(item, type) {
+  if (!isLoggedIn.value) { ElMessage.warning('请先登录'); return }
+  const key = type + '-' + item.id
+  const res = await toggleFavorite({ userId: userInfo.value.id, resourceType: type, resourceId: item.id })
+  favoritedMap.value[key] = res.data.favorited
+  if (res.data.count !== undefined) {
+    if (type === 'song') item.favCount = res.data.count
+  }
+}
+
+async function loadUserStatus() {
+  if (!isLoggedIn.value) return
+  const uid = userInfo.value.id
+  for (const item of songs.value) {
+    try {
+      const [likeRes, favRes] = await Promise.all([
+        getLikeStatus(uid, 'song', item.id),
+        getFavoriteStatus(uid, 'song', item.id)
+      ])
+      likedMap.value['song-' + item.id] = likeRes.data
+      favoritedMap.value['song-' + item.id] = favRes.data
+    } catch {}
+  }
+}
+
 
 function goPlaylist(item) { router.push('/detail/playlist/' + (item.id || item.resourceId)) }
 function goSinger(item) { router.push('/detail/singer/' + (item.id || item.resourceId)) }
@@ -67,7 +103,7 @@ function playSong(item) {
   window.dispatchEvent(new CustomEvent('play-song', { detail: song }))
 }
 
-onMounted(() => fetchData())
+onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
 </script>
 
 <template>
@@ -147,6 +183,11 @@ onMounted(() => fetchData())
               <h3 class="card-title">{{ item.name }}</h3>
               <p class="card-desc" v-if="item.description">{{ item.description }}</p>
             </div>
+            <div class="card-actions" @click.stop>
+              <button class="action-btn-sm" :class="{ active: favoritedMap['playlist-' + item.id] }" @click="handleFavorite(item, 'playlist')" title="收藏">
+                {{ favoritedMap['playlist-' + item.id] ? '⭐' : '☆' }}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -163,6 +204,11 @@ onMounted(() => fetchData())
             </div>
             <h3 class="singer-name">{{ item.name }}</h3>
             <p class="singer-region" v-if="item.region">{{ item.region }}</p>
+            <div class="singer-actions" @click.stop>
+              <button class="action-btn-sm" :class="{ active: favoritedMap['singer-' + item.id] }" @click="handleFavorite(item, 'singer')" title="收藏">
+                {{ favoritedMap['singer-' + item.id] ? '⭐' : '☆' }}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -184,6 +230,14 @@ onMounted(() => fetchData())
               <span v-if="item.playCount">🎧 {{ formatCount(item.playCount) }}</span>
               <span v-if="item.likeCount">👍 {{ formatCount(item.likeCount) }}</span>
               <span v-if="item.favCount">⭐ {{ formatCount(item.favCount) }}</span>
+            </div>
+            <div class="song-actions" @click.stop>
+              <button class="action-btn" :class="{ active: likedMap['song-' + item.id] }" @click="handleLike(item, 'song')" title="点赞">
+                {{ likedMap['song-' + item.id] ? '❤️' : '🤍' }}
+              </button>
+              <button class="action-btn" :class="{ active: favoritedMap['song-' + item.id] }" @click="handleFavorite(item, 'song')" title="收藏">
+                {{ favoritedMap['song-' + item.id] ? '⭐' : '☆' }}
+              </button>
             </div>
           </div>
         </div>

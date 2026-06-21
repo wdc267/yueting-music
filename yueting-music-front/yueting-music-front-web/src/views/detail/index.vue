@@ -2,6 +2,8 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getSingerDetail, getPlaylistDetail } from '@/api/recommend'
+import { toggleLike, toggleFavorite, getLikeStatus, getFavoriteStatus } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +15,39 @@ const songs = ref([])
 const loading = ref(true)
 const currentPlayingSongId = ref(null)
 const currentPlayingState = ref(false)
+const userInfo = JSON.parse(localStorage.getItem('user_info') || 'null')
+const isLoggedIn = !!userInfo
+const likedMap = ref({})
+const favoritedMap = ref({})
+
+
+async function handleLike(item, type) {
+  if (!isLoggedIn) { ElMessage.warning('请先登录'); return }
+  const key = type + '-' + item.id
+  const res = await toggleLike({ userId: userInfo.id, resourceType: type, resourceId: item.id })
+  likedMap.value[key] = res.data.liked
+}
+
+async function handleFavorite(item, type) {
+  if (!isLoggedIn) { ElMessage.warning('请先登录'); return }
+  const key = type + '-' + item.id
+  const res = await toggleFavorite({ userId: userInfo.id, resourceType: type, resourceId: item.id })
+  favoritedMap.value[key] = res.data.favorited
+}
+
+async function loadUserStatus(songList) {
+  if (!isLoggedIn) return
+  for (const item of songList) {
+    try {
+      const [likeRes, favRes] = await Promise.all([
+        getLikeStatus(userInfo.id, 'song', item.id),
+        getFavoriteStatus(userInfo.id, 'song', item.id)
+      ])
+      likedMap.value['song-' + item.id] = likeRes.data
+      favoritedMap.value['song-' + item.id] = favRes.data
+    } catch {}
+  }
+}
 
 function onPlayStateChange(event) {
   const { playing, songId } = event.detail
@@ -56,10 +91,12 @@ onMounted(async () => {
       const res = await getSingerDetail(id)
       detail.value = res.data.singer
       songs.value = res.data.songs || []
+      loadUserStatus(res.data.songs || [])
     } else if (type === 'playlist') {
       const res = await getPlaylistDetail(id)
       detail.value = res.data
       songs.value = res.data.songs || []
+      loadUserStatus(res.data.songs || [])
     }
   } catch (err) {
     console.error('获取详情失败:', err)
@@ -83,27 +120,33 @@ onUnmounted(() => {
     </header>
 
     <div class="detail-content" v-loading="loading">
-      <template v-if="type === 'singer' && detail">
+      <div v-if="type === 'singer' && detail">
         <div class="info-card">
           <img :src="getCover(detail)" class="info-avatar" @error="handleImageError" />
           <div class="info-meta">
             <h1 class="info-name">{{ detail.name }}</h1>
             <p class="info-tag" v-if="detail.region">{{ detail.region }}</p>
             <p class="info-desc" v-if="detail.remark">{{ detail.remark }}</p>
+            <button class="info-fav-btn" :class="{ active: favoritedMap[type + '-' + detail.id] }" @click="handleFavorite(detail, type)" title="收藏">
+              {{ favoritedMap[type + '-' + detail.id] ? '⭐ 已收藏' : '☆ 收藏' }}
+            </button>
           </div>
         </div>
-      </template>
+      </div>
 
-      <template v-else-if="type === 'playlist' && detail">
+      <div v-else-if="type === 'playlist' && detail">
         <div class="info-card">
           <img :src="getCover(detail)" class="info-cover" @error="handleImageError" />
           <div class="info-meta">
             <h1 class="info-name">{{ detail.name }}</h1>
             <p class="info-desc" v-if="detail.description">{{ detail.description }}</p>
             <p class="info-count">{{ songs.length }} 首歌曲</p>
+            <button class="info-fav-btn" :class="{ active: favoritedMap[type + '-' + detail.id] }" @click="handleFavorite(detail, type)" title="收藏">
+              {{ favoritedMap[type + '-' + detail.id] ? '⭐ 已收藏' : '☆ 收藏' }}
+            </button>
           </div>
         </div>
-      </template>
+      </div>
 
       <div class="song-section" v-if="songs.length > 0">
         <h3>歌曲列表 ({{ songs.length }})</h3>
@@ -115,6 +158,14 @@ onUnmounted(() => {
             <span class="row-artist" v-if="item.singerName">{{ item.singerName }}</span>
           </div>
           <span class="row-duration" v-if="item.duration">{{ Math.floor(item.duration / 60) }}:{{ String(item.duration % 60).padStart(2, '0') }}</span>
+          <span class="row-actions" @click.stop>
+            <button class="action-btn-xs" :class="{ active: likedMap['song-' + item.id] }" @click="handleLike(item, 'song')" title="点赞">
+              {{ likedMap['song-' + item.id] ? '❤️' : '🤍' }}
+            </button>
+            <button class="action-btn-xs" :class="{ active: favoritedMap['song-' + item.id] }" @click="handleFavorite(item, 'song')" title="收藏">
+              {{ favoritedMap['song-' + item.id] ? '⭐' : '☆' }}
+            </button>
+          </span>
           <button class="row-play" :class="{ playing: isCurrentSong(item.id) }" @click.stop="playSong(item)">
             <svg v-if="isCurrentSong(item.id)" viewBox="0 0 24 24" width="14" height="14">
               <rect x="6" y="4" width="4" height="16" rx="1"/>
@@ -194,4 +245,19 @@ $shadow: rgba(59, 130, 246, 0.12);
 .row-play:hover { background: $primary; color: #fff; }
 .row-play.playing { background: $primary; color: #fff; }
 .row-play svg { fill: currentColor; }
+
+.row-actions { display: flex; gap: 4px; margin: 0 8px; }
+.action-btn-xs {
+  background: none; border: none; font-size: 13px; cursor: pointer;
+  padding: 2px 4px; border-radius: 4px; transition: all 0.2s; line-height: 1;
+}
+.action-btn-xs:hover { transform: scale(1.2); }
+.action-btn-xs.active { transform: scale(1.1); }
+
+.info-fav-btn {
+  margin-top: 8px; padding: 4px 14px; border-radius: 20px;
+  border: 1px solid #3b82f6; background: none; color: #3b82f6;
+  font-size: 13px; cursor: pointer; transition: all 0.2s;
+}
+.info-fav-btn:hover, .info-fav-btn.active { background: #3b82f6; color: #fff; }
 </style>
