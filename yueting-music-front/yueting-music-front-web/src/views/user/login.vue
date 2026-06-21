@@ -127,14 +127,14 @@ async function handleSubmit() {
 </template>
 
 <style scoped lang="scss">
-$primary: #3b82f6;
+$primary: #ff85a2;
 
 .login-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #ede9fe 100%);
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #f5f0ff 100%);
   padding: 20px;
 }
 
@@ -145,8 +145,8 @@ $primary: #3b82f6;
   backdrop-filter: blur(16px);
   border-radius: 20px;
   padding: 40px 36px 32px;
-  box-shadow: 0 8px 40px rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.06);
+  box-shadow: 0 8px 40px rgba(255, 133, 162, 0.12);
+  border: 1px solid rgba(255, 133, 162, 0.06);
 }
 
 .login-header {
@@ -167,7 +167,7 @@ $primary: #3b82f6;
 .logo-text {
   font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, $primary, #8b5cf6);
+  background: linear-gradient(135deg, $primary, #c084fc);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -204,7 +204,7 @@ $primary: #3b82f6;
   font-size: 16px;
   font-weight: 600;
   border-radius: 22px !important;
-  background: linear-gradient(135deg, $primary, #6366f1);
+  background: linear-gradient(135deg, $primary, #c084fc);
   border: none;
   transition: all 0.3s;
 
