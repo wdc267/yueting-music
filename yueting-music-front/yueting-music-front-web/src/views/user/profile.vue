@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getUserProfile } from '@/api/user'
+import { getUserProfile, toggleLike, toggleFavorite } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userInfo = ref(null)
@@ -28,9 +29,58 @@ const currentList = computed(() => {
 })
 
 function getCover(item) {
-  return item.cover || item.avatar || ''
+  const url = item.cover || item.avatar || ''
+  if (url && (url.startsWith('upload/') || url.startsWith('/upload/'))) return '/api' + (url.startsWith('/') ? url : '/' + url)
+  return url || ''
 }
 
+
+function normalizeUrl(url) {
+  if (!url) return ''
+  if (url.startsWith('upload/') || url.startsWith('/upload/')) return '/api' + (url.startsWith('/') ? url : '/' + url)
+  return url
+}
+
+function playSong(item) {
+  const song = {
+    id: item.id,
+    name: item.name,
+    cover: item.cover,
+    url: item.url || '',
+    singerId: item.singerId,
+    singerName: item.singerName,
+    duration: item.duration
+  }
+  window.dispatchEvent(new CustomEvent('play-song', { detail: song }))
+}
+
+
+async function unlike(item) {
+  const res = await toggleLike({ userId: userInfo.value.id, resourceType: 'song', resourceId: item.id })
+  if (!res.data.liked) {
+    ElMessage.success('已取消点赞')
+    // Remove from current list
+    if (profile.value) {
+      profile.value.likedSongs = profile.value.likedSongs.filter(s => s.id !== item.id)
+    }
+  }
+}
+
+async function unfavorite(item, type) {
+  const res = await toggleFavorite({ userId: userInfo.value.id, resourceType: type, resourceId: item.id })
+  if (!res.data.favorited) {
+    ElMessage.success('已取消收藏')
+    // Remove from current list
+    if (profile.value) {
+      const keyMap = { song: 'favoriteSongs', playlist: 'favoritePlaylists', singer: 'favoriteSingers' }
+      const key = keyMap[type]
+      if (key) profile.value[key] = profile.value[key].filter(s => s.id !== item.id)
+    }
+  }
+}
+function goDetail(item, type) {
+  router.push('/detail/' + type + '/' + item.id)
+}
 function handleImageError(e) {
   e.target.src = 'https://via.placeholder.com/300/3b82f6/ffffff?text=Music'
 }
@@ -101,34 +151,42 @@ onMounted(async () => {
       <div class="list-section" v-if="currentList.length > 0">
         <!-- 歌曲列表 -->
         <template v-if="activeTab === 'likedSongs' || activeTab === 'favoriteSongs'">
-          <div v-for="item in currentList" :key="item.id" class="list-item">
+          <div v-for="item in currentList" :key="item.id" class="list-item" @click="playSong(item)" style="cursor:pointer">
             <img :src="getCover(item)" class="item-cover" @error="handleImageError" />
             <div class="item-info">
               <span class="item-name">{{ item.name }}</span>
               <span class="item-artist" v-if="item.singerName">{{ item.singerName }}</span>
             </div>
+          
+            <button class="action-icon-btn" @click.stop="activeTab === 'likedSongs' ? unlike(item) : unfavorite(item, 'song')" :title="activeTab === 'likedSongs' ? '取消点赞' : '取消收藏'">
+    {{ activeTab === 'likedSongs' ? '❤️' : '⭐' }}
+  </button>
           </div>
         </template>
 
         <!-- 歌单列表 -->
         <template v-else-if="activeTab === 'favoritePlaylists'">
-          <div v-for="item in currentList" :key="item.id" class="list-item">
+          <div v-for="item in currentList" :key="item.id" class="list-item" @click="goDetail(item, 'playlist')" style="cursor:pointer">
             <img :src="getCover(item)" class="item-cover" @error="handleImageError" />
             <div class="item-info">
               <span class="item-name">{{ item.name }}</span>
               <span class="item-artist" v-if="item.songCount">{{ item.songCount }} 首</span>
             </div>
+          
+            <button class="action-icon-btn" @click.stop="unfavorite(item, 'playlist')" title="取消收藏">⭐</button>
           </div>
         </template>
 
         <!-- 歌手列表 -->
         <template v-else-if="activeTab === 'favoriteSingers'">
-          <div v-for="item in currentList" :key="item.id" class="list-item singer-item">
+          <div v-for="item in currentList" :key="item.id" class="list-item singer-item" @click="goDetail(item, 'singer')" style="cursor:pointer">
             <img :src="getCover(item)" class="item-avatar" @error="handleImageError" />
             <div class="item-info">
               <span class="item-name">{{ item.name }}</span>
               <span class="item-artist" v-if="item.region">{{ item.region }}</span>
             </div>
+          
+            <button class="action-icon-btn" @click.stop="unfavorite(item, 'singer')" title="取消收藏">⭐</button>
           </div>
         </template>
       </div>
@@ -253,4 +311,13 @@ $primary: #3b82f6;
 .item-info { display: flex; flex-direction: column; gap: 2px; }
 .item-name { font-size: 14px; font-weight: 500; color: #1e293b; }
 .item-artist { font-size: 12px; color: #94a3b8; }
+.list-item { cursor: pointer; }
+
+.action-icon-btn {
+  border: none; background: transparent;
+  font-size: 16px; cursor: pointer;
+  padding: 4px 8px; transition: all 0.2s;
+  flex-shrink: 0; margin-left: auto;
+}
+.action-icon-btn:hover { transform: scale(1.2); }
 </style>
