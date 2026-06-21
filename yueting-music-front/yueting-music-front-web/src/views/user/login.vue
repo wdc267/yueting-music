@@ -2,19 +2,32 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
-import { login, register } from '@/api/user'
+import { login, register, uploadAvatar } from '@/api/user'
 
 const router = useRouter()
 const route = useRoute()
 
 const isLogin = ref(true)
-const form = ref({ username: '', password: '' })
+const form = ref({ username: '', password: '', nickname: '' })
+const avatarFile = ref(null)
+const avatarPreview = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
 
+
+function onAvatarChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  avatarFile.value = file
+  const reader = new FileReader()
+  reader.onload = (ev) => { avatarPreview.value = ev.target.result }
+  reader.readAsDataURL(file)
+}
 function toggleMode() {
   isLogin.value = !isLogin.value
   confirmPassword.value = ''
+  avatarFile.value = null
+  avatarPreview.value = ''
 }
 
 async function handleSubmit() {
@@ -31,7 +44,7 @@ async function handleSubmit() {
   try {
     const res = isLogin.value
       ? await login(form.value)
-      : await register(form.value)
+      : await register({ ...form.value })
     if (res.code === 200) {
       if (isLogin.value) {
         localStorage.setItem('user_token', res.data.token)
@@ -39,6 +52,16 @@ async function handleSubmit() {
         const redirect = route.query.redirect || '/'
         router.push(redirect)
       } else {
+        // Upload avatar if selected
+        if (avatarFile.value && res.data.id) {
+          try {
+            const avatarRes = await uploadAvatar(res.data.id, avatarFile.value)
+            if (avatarRes.code === 200) {
+              const u = JSON.parse(localStorage.getItem('user_info') || '{}')
+              u.avatar = avatarRes.data
+            }
+          } catch {}
+        }
         ElMessage.success('注册成功，请登录')
         isLogin.value = true
       }
@@ -70,7 +93,20 @@ async function handleSubmit() {
           <el-input v-model="form.password" type="password" placeholder="密码" size="large" prefix-icon="Lock" show-password />
         </el-form-item>
         <el-form-item v-if="!isLogin">
+          <el-input v-model="form.nickname" placeholder="昵称（选填）" size="large" prefix-icon="User" />
+        </el-form-item>
+        <el-form-item v-if="!isLogin">
           <el-input v-model="confirmPassword" type="password" placeholder="确认密码" size="large" prefix-icon="Lock" show-password />
+        </el-form-item>
+        <el-form-item v-if="!isLogin">
+          <div class="avatar-upload">
+            <div class="avatar-preview" @click="$refs.avatarInput.click()">
+              <img v-if="avatarPreview" :src="avatarPreview" />
+              <span v-else class="avatar-placeholder">{{ form.username?.charAt(0) || '?' }}</span>
+            </div>
+            <span class="avatar-tip">点击上传头像（可选）</span>
+          </div>
+          <input ref="avatarInput" type="file" accept="image/*" style="display:none" @change="onAvatarChange" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" class="submit-btn" :loading="loading" native-type="submit" round>
@@ -190,8 +226,24 @@ $primary: #3b82f6;
   font-weight: 600;
   margin-left: 4px;
 
-  &:hover {
-    text-decoration: underline;
-  }
+  &:hover { text-decoration: underline; }
 }
+
+.avatar-upload { display: flex; align-items: center; gap: 14px; }
+.avatar-preview {
+  width: 64px; height: 64px; border-radius: 50%;
+  overflow: hidden; cursor: pointer;
+  border: 2px dashed #e2e8f0; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.avatar-preview:hover { border-color: $primary; }
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-placeholder {
+  width: 100%; height: 100%; display: flex;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #ff85a2, #c084fc);
+  color: #fff; font-size: 22px; font-weight: 700;
+}
+.avatar-tip { font-size: 12px; color: #94a3b8; }
 </style>

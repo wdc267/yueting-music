@@ -8,6 +8,13 @@ export function register(data) {
   return request.post('/web/user/register', data)
 }
 
+export function uploadAvatar(userId, file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('userId', userId)
+  return request.post('/web/user/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+}
+
 export function getUserInfo(id) {
   return request.get('/web/user/info/' + id)
 }

@@ -25,4 +25,7 @@
       <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
     </set> WHERE id = #{id}
   </update>
+  <update id="updateAvatar">
+    UPDATE user_info SET avatar = #{avatar} WHERE id = #{userId}
+  </update>
 </mapper>

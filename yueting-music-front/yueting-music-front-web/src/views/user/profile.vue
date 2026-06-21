@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getUserProfile, toggleLike, toggleFavorite } from '@/api/user'
+import { getUserProfile, toggleLike, toggleFavorite, uploadAvatar } from '@/api/user'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -81,6 +81,42 @@ async function unfavorite(item, type) {
 function goDetail(item, type) {
   router.push('/detail/' + type + '/' + item.id)
 }
+
+const avatarUploading = ref(false)
+
+function getAvatarUrl() {
+  if (userInfo.value?.avatar) {
+    const url = userInfo.value.avatar
+    if (url.startsWith('upload/') || url.startsWith('/upload/')) return '/api' + (url.startsWith('/') ? url : '/' + url)
+    return url
+  }
+  return ''
+}
+
+function getInitialChar() {
+  return (userInfo.value?.nickname || userInfo.value?.username || 'U').charAt(0)
+}
+
+function triggerAvatarUpload() {
+  const input = document.getElementById('avatar-file-input')
+  if (input) input.click()
+}
+
+async function onAvatarFileChange(e) {
+  const file = e.target.files[0]
+  if (!file || !userInfo.value) return
+  avatarUploading.value = true
+  try {
+    const res = await uploadAvatar(userInfo.value.id, file)
+    if (res.code === 200) {
+      userInfo.value.avatar = res.data
+      localStorage.setItem('user_info', JSON.stringify(userInfo.value))
+      ElMessage.success('头像更新成功')
+    }
+  } catch { ElMessage.error('上传失败') }
+  finally { avatarUploading.value = false; e.target.value = '' }
+}
+
 function handleImageError(e) {
   e.target.src = 'https://via.placeholder.com/300/3b82f6/ffffff?text=Music'
 }
@@ -122,8 +158,13 @@ onMounted(async () => {
     <div class="profile-content" v-loading="loading">
       <!-- 用户信息卡片 -->
       <div class="user-card" v-if="userInfo">
-        <div class="user-avatar">
-          <img :src="userInfo.avatar || 'https://via.placeholder.com/100/3b82f6/ffffff?text=U'" @error="handleImageError" />
+        <div class="user-avatar" @click="triggerAvatarUpload" title="点击更换头像" v-loading="avatarUploading">
+          <template v-if="getAvatarUrl()">
+            <img :src="getAvatarUrl()" @error="handleImageError" />
+            <div class="avatar-edit-overlay"><span>编辑</span></div>
+          </template>
+          <span v-else class="avatar-fallback">编辑</span>
+          <input id="avatar-file-input" type="file" accept="image/*" style="display:none" @change="onAvatarFileChange" />
         </div>
         <div class="user-detail">
           <h2>{{ userInfo.nickname || userInfo.username }}</h2>
@@ -253,14 +294,36 @@ $primary: #ff85a2;
 }
 
 .user-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
+  width: 80px; height: 80px;
+  border-radius: 50%; overflow: hidden;
   border: 3px solid #fff;
-  box-shadow: 0 4px 12px rgba(255, 133, 162,0.15);
+  box-shadow: 0 4px 12px rgba(255, 133, 162, 0.2);
+  cursor: pointer; position: relative;
+  flex-shrink: 0;
 }
-.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-avatar img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; border-radius: 50%;
+}
+.avatar-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #ff85a2; color: #fff;
+  font-size: 15px; font-weight: 600;
+  border-radius: 50%;
+  line-height: 1;
+}
+.avatar-edit-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 133, 162, 0.85);
+  opacity: 0; transition: opacity 0.3s ease;
+  border-radius: 50%; color: #fff;
+  font-size: 15px; font-weight: 600;
+  line-height: 1;
+}
+.user-avatar:hover .avatar-edit-overlay { opacity: 1; }
 
 .user-detail h2 { font-size: 20px; font-weight: 700; color: #1e293b; }
 .user-username { font-size: 13px; color: #94a3b8; margin-top: 2px; }

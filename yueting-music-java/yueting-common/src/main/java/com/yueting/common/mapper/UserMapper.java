@@ -8,4 +8,5 @@ public interface UserMapper {
   UserInfo selectByUsername(@Param("username") String username);
   int insert(UserInfo user);
   int update(UserInfo user);
+  int updateAvatar(@Param("userId") Long userId, @Param("avatar") String avatar);
 }
