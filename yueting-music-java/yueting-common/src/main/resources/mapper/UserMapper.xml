@@ -28,4 +28,26 @@
   <update id="updateAvatar">
     UPDATE user_info SET avatar = #{avatar} WHERE id = #{userId}
   </update>
+  <update id="updatePassword">
+    UPDATE user_info SET password = #{password} WHERE id = #{userId}
+  </update>
+  <select id="selectList" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/> FROM user_info
+    <where>
+      <if test="query.username != null and query.username != ''">
+        AND username LIKE CONCAT('%', #{query.username}, '%')
+      </if>
+      <if test="query.nickname != null and query.nickname != ''">
+        AND nickname LIKE CONCAT('%', #{query.nickname}, '%')
+      </if>
+      <if test="query.status != null">
+        AND status = #{query.status}
+      </if>
+    </where>
+    ORDER BY create_time DESC
+    LIMIT #{query.pageSize} OFFSET #{query.offset}
+  </select>
+  <delete id="deleteById">
+    DELETE FROM user_info WHERE id = #{id}
+  </delete>
 </mapper>

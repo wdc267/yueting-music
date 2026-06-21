@@ -2,8 +2,7 @@ package com.yueting.common.service.impl;
 
 import com.yueting.common.mapper.UserMapper;
 import com.yueting.common.service.UserService;
-import com.yueting.entity.dto.UserLoginDTO;
-import com.yueting.entity.dto.UserRegisterDTO;
+import com.yueting.entity.dto.*;
 import com.yueting.entity.po.UserInfo;
 import com.yueting.entity.vo.UserLoginVO;
 import com.yueting.entity.vo.UserVO;
@@ -14,9 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
-
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,17 +36,14 @@ public class UserServiceImpl implements UserService {
     if (user.getStatus() == 0) {
       throw new RuntimeException("账号已被禁用");
     }
-    // 简单密码校验（生产环境应使用 BCrypt 等加密）
     if (!dto.getPassword().equals(user.getPassword())) {
       throw new RuntimeException("密码错误");
     }
-    // 更新最后登录时间
     user.setLastLoginTime(LocalDateTime.now());
     userMapper.update(user);
 
     UserLoginVO vo = new UserLoginVO();
     vo.setUser(toVO(user));
-    // 简单 token：实际应用应使用 JWT
     vo.setToken(UUID.randomUUID().toString().replace("-", ""));
     return vo;
   }
@@ -54,7 +51,6 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public UserVO register(UserRegisterDTO dto) {
-    // 检查用户名是否已存在
     UserInfo exist = userMapper.selectByUsername(dto.getUsername());
     if (exist != null) {
       throw new RuntimeException("用户名已存在");
@@ -94,6 +90,36 @@ public class UserServiceImpl implements UserService {
     } catch (Exception e) {
       throw new RuntimeException("头像上传失败: " + e.getMessage());
     }
+  }
+
+  @Override
+  public List<UserVO> selectList(UserQueryDTO query) {
+    return userMapper.selectList(query).stream()
+        .map(this::toVO)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void update(UserUpdateDTO dto) {
+    UserInfo user = new UserInfo();
+    user.setId(dto.getId());
+    user.setNickname(dto.getNickname());
+    user.setGender(dto.getGender());
+    user.setStatus(dto.getStatus());
+    userMapper.update(user);
+  }
+
+  @Override
+  public void updatePassword(UserPasswordDTO dto) {
+    if (dto.getNewPassword() == null || dto.getNewPassword().trim().isEmpty()) {
+      throw new RuntimeException("密码不能为空");
+    }
+    userMapper.updatePassword(dto.getId(), dto.getNewPassword());
+  }
+
+  @Override
+  public void delete(Long id) {
+    userMapper.deleteById(id);
   }
 
   private UserVO toVO(UserInfo user) {

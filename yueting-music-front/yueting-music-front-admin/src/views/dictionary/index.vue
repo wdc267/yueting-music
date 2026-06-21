@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -147,7 +147,7 @@ onMounted(() => {
           >
             <el-table-column prop="dictName" label="字典名称" min-width="100" />
             <el-table-column prop="dictCode" label="编码" min-width="80" />
-            <el-table-column label="状态" width="60">
+            <el-table-column label="状态" width="70">
               <template #default="{ row }">
                 <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
                   {{ row.status === 1 ? '启用' : '禁用' }}
@@ -178,7 +178,7 @@ onMounted(() => {
           <el-table :data="dataList" v-if="selectedType">
             <el-table-column prop="dictLabel" label="标签" min-width="100" />
             <el-table-column prop="dictValue" label="键值" min-width="100" />
-            <el-table-column label="状态" width="60">
+            <el-table-column label="状态" width="70">
               <template #default="{ row }">
                 <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
                   {{ row.status === 1 ? '启用' : '禁用' }}
