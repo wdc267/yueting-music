@@ -184,16 +184,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-$primary: #3b82f6;
+$primary: #ff85a2;
 $text: #1e293b;
 $text-light: #94a3b8;
-$shadow: rgba(59, 130, 246, 0.12);
+$shadow: rgba(255, 133, 162, 0.12);
 
-.detail-page { min-height: 100vh; background: linear-gradient(180deg, #eff6ff 0%, #f0f4ff 30%, #dbeafe 100%); padding-bottom: 80px; }
+.detail-page { min-height: 100vh; background: linear-gradient(180deg, #fdf2f8 0%, #fce7f3 30%, #fce7f3 100%); padding-bottom: 80px; }
 
 .detail-header {
   background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(59,130,246,0.08);
+  border-bottom: 1px solid rgba(255, 133, 162,0.08);
   position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   max-width: 800px; margin: 0 auto; padding: 0 24px; height: 56px;
@@ -225,7 +225,7 @@ $shadow: rgba(59, 130, 246, 0.12);
 .song-row {
   display: flex; align-items: center; padding: 12px 16px;
   background: #fff; border-radius: 12px; cursor: pointer;
-  transition: all 0.2s; margin-bottom: 6px; box-shadow: 0 1px 6px rgba(59,130,246,0.06);
+  transition: all 0.2s; margin-bottom: 6px; box-shadow: 0 1px 6px rgba(255, 133, 162,0.06);
 }
 .song-row:hover { background: rgba($primary, 0.04); transform: translateX(4px); }
 
@@ -256,8 +256,8 @@ $shadow: rgba(59, 130, 246, 0.12);
 
 .info-fav-btn {
   margin-top: 8px; padding: 4px 14px; border-radius: 20px;
-  border: 1px solid #3b82f6; background: none; color: #3b82f6;
+  border: 1px solid #ff85a2; background: none; color: #ff85a2;
   font-size: 13px; cursor: pointer; transition: all 0.2s;
 }
-.info-fav-btn:hover, .info-fav-btn.active { background: #3b82f6; color: #fff; }
+.info-fav-btn:hover, .info-fav-btn.active { background: #ff85a2; color: #fff; }
 </style>

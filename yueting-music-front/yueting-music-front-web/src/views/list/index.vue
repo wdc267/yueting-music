@@ -131,13 +131,13 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
-$primary: #3b82f6;
+$primary: #ff85a2;
 $text: #1e293b;
 $text-light: #94a3b8;
-$shadow: rgba(59, 130, 246, 0.12);
+$shadow: rgba(255, 133, 162, 0.12);
 
-.list-page { min-height: 100vh; background: linear-gradient(180deg, #eff6ff 0%, #f0f4ff 30%, #dbeafe 100%); padding-bottom: 80px; }
-.list-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(59,130,246,0.08); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 56px; }
+.list-page { min-height: 100vh; background: linear-gradient(180deg, #fdf2f8 0%, #fce7f3 30%, #fce7f3 100%); padding-bottom: 80px; }
+.list-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 133, 162,0.08); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 56px; }
 .back-link { color: $primary; font-size: 14px; font-weight: 500; }
 .back-link:hover { text-decoration: underline; }
 .list-header h2 { font-size: 16px; font-weight: 600; color: $text; }
@@ -145,7 +145,7 @@ $shadow: rgba(59, 130, 246, 0.12);
 .grid-5col { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
 .card { background: #fff; border-radius: 14px; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 2px 12px $shadow; cursor: pointer; }
 .card:hover { transform: translateY(-6px); box-shadow: 0 8px 30px $shadow; }
-.card-img-wrap { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: #f0f4ff; }
+.card-img-wrap { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: #fce7f3; }
 .card-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .card-count { position: absolute; bottom: 8px; right: 10px; font-size: 11px; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 10px; border-radius: 10px; }
 .card-body { padding: 10px 14px 14px; }
@@ -168,8 +168,8 @@ $shadow: rgba(59, 130, 246, 0.12);
 .song-name { font-size: 14px; font-weight: 500; color: $text; }
 .song-artist { font-size: 12px; color: $text-light; }
 .song-duration { font-size: 12px; color: $text-light; }
-.song-play-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: linear-gradient(135deg, $primary, #6366f1); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 10px; transition: all 0.2s; }
-.song-play-btn:hover { transform: scale(1.1); box-shadow: 0 3px 10px rgba(59,130,246,0.3); }
+.song-play-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: linear-gradient(135deg, $primary, #c084fc); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 10px; transition: all 0.2s; }
+.song-play-btn:hover { transform: scale(1.1); box-shadow: 0 3px 10px rgba(255, 133, 162,0.3); }
 .song-play-btn svg { fill: currentColor; stroke: none; }
 .card-actions, .singer-actions { display: flex; justify-content: center; padding: 4px 0 10px; }
 .action-btn-sm { background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; }

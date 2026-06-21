@@ -197,17 +197,17 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
-$primary: #3b82f6;
+$primary: #ff85a2;
 
 .profile-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  background: linear-gradient(180deg, #fdf2f8 0%, #fce7f3 100%);
 }
 
 .top-header {
   background: rgba(255,255,255,0.85);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(59,130,246,0.08);
+  border-bottom: 1px solid rgba(255, 133, 162,0.08);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -248,7 +248,7 @@ $primary: #3b82f6;
   display: flex;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 2px 12px rgba(59,130,246,0.1);
+  box-shadow: 0 2px 12px rgba(255, 133, 162,0.1);
   margin-bottom: 24px;
 }
 
@@ -258,7 +258,7 @@ $primary: #3b82f6;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid #fff;
-  box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+  box-shadow: 0 4px 12px rgba(255, 133, 162,0.15);
 }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -292,7 +292,7 @@ $primary: #3b82f6;
   background: #fff;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(59,130,246,0.08);
+  box-shadow: 0 2px 12px rgba(255, 133, 162,0.08);
 }
 
 .list-item {
@@ -303,7 +303,7 @@ $primary: #3b82f6;
   transition: background 0.2s;
 }
 .list-item:last-child { border-bottom: none; }
-.list-item:hover { background: rgba(59,130,246,0.04); }
+.list-item:hover { background: rgba(255, 133, 162,0.04); }
 
 .item-cover { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; margin-right: 14px; }
 .item-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 14px; }
