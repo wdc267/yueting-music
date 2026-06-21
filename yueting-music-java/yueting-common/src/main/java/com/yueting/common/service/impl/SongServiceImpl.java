@@ -31,7 +31,11 @@ public class SongServiceImpl implements SongService {
 
   @Override
   public List<SongVO> selectEnabledList() {
-    return songMapper.selectEnabledList().stream().map(this::toVO).collect(Collectors.toList());
+    return songMapper.selectEnabledList().stream().map(s -> {
+      SongVO vo = toVO(s);
+      if (s.getSingerId() != null) { Singer singer = singerMapper.selectById(s.getSingerId()); if (singer != null) vo.setSingerName(singer.getName()); }
+      return vo;
+    }).collect(Collectors.toList());
   }
 
   @Override

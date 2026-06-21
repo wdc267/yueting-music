@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.UserPlayHistoryMapper">
+  <resultMap id="BaseResultMap" type="com.yueting.entity.po.UserPlayHistory">
+    <id column="id" property="id"/>
+    <result column="user_id" property="userId"/>
+    <result column="song_id" property="songId"/>
+    <result column="play_duration" property="playDuration"/>
+    <result column="play_percent" property="playPercent"/>
+    <result column="play_time" property="playTime"/>
+  </resultMap>
+  <sql id="BaseColumns">id,user_id,song_id,play_duration,play_percent,play_time</sql>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO user_play_history (user_id,song_id,play_duration,play_percent) VALUES (#{userId},#{songId},#{playDuration},#{playPercent})
+  </insert>
+  <select id="selectByUserId" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/> FROM user_play_history WHERE user_id = #{userId} ORDER BY play_time DESC
+  </select>
+</mapper>

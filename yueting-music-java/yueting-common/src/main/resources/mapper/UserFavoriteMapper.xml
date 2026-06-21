@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.UserFavoriteMapper">
+  <resultMap id="BaseResultMap" type="com.yueting.entity.po.UserFavorite">
+    <id column="id" property="id"/>
+    <result column="user_id" property="userId"/>
+    <result column="resource_type" property="resourceType"/>
+    <result column="resource_id" property="resourceId"/>
+    <result column="create_time" property="createTime"/>
+  </resultMap>
+  <sql id="BaseColumns">id,user_id,resource_type,resource_id,create_time</sql>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO user_favorite (user_id,resource_type,resource_id) VALUES (#{userId},#{resourceType},#{resourceId})
+  </insert>
+  <delete id="deleteByUserAndResource">
+    DELETE FROM user_favorite WHERE user_id = #{userId} AND resource_type = #{resourceType} AND resource_id = #{resourceId}
+  </delete>
+  <select id="selectByUserAndResource" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/> FROM user_favorite WHERE user_id = #{userId} AND resource_type = #{resourceType} AND resource_id = #{resourceId}
+  </select>
+  <select id="selectByUserIdAndType" resultMap="BaseResultMap">
+    SELECT <include refid="BaseColumns"/> FROM user_favorite WHERE user_id = #{userId} AND resource_type = #{resourceType} ORDER BY create_time DESC
+  </select>
+  <select id="countByResource" resultType="int">
+    SELECT COUNT(*) FROM user_favorite WHERE resource_type = #{resourceType} AND resource_id = #{resourceId}
+  </select>
+</mapper>
