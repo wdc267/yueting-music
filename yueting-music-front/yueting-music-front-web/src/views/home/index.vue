@@ -88,7 +88,7 @@ function handleTodayClick(item) {
   else if (item.resourceType === 'singer') { router.push('/detail/singer/' + (item.resourceId || item.id)) }
   else if (item.resourceType === 'playlist') { router.push('/detail/playlist/' + (item.resourceId || item.id)) }
 }
-function logout() { localStorage.removeItem('user_token'); localStorage.removeItem('user_info'); router.push('/') }
+function logout() { localStorage.removeItem('user_token'); localStorage.removeItem('user_info'); window.location.href = '/' }
 
 function playSong(item) {
   const song = {

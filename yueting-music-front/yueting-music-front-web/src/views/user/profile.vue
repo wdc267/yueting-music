@@ -124,7 +124,7 @@ function handleImageError(e) {
 function logout() {
   localStorage.removeItem('user_token')
   localStorage.removeItem('user_info')
-  router.push('/login')
+  window.location.href = '/login'
 }
 
 onMounted(async () => {
