@@ -1,11 +1,14 @@
 ﻿<script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { recordPlay } from '@/api/user'
 
 const currentSong = ref(null)
 const isPlaying = ref(false)
+const userId = ref(null)
 const currentTime = ref(0)
 const duration = ref(0)
 const progress = ref(0)
+const lastPlayedSongId = ref(null)
 let audioInstance = null
 
 function getCoverUrl(item) {
@@ -30,8 +33,23 @@ function normalizeUrl(url) {
   return url
 }
 
+function getUserId() {
+  if (userId.value) return userId.value
+  try {
+    const info = JSON.parse(localStorage.getItem('user_info') || '{}')
+    userId.value = info.id || null
+    return userId.value
+  } catch { return null }
+}
+
+function onPlayStarted(songId) {
+  if (songId && songId !== lastPlayedSongId.value) {
+    lastPlayedSongId.value = songId
+    recordPlay(songId, getUserId()).catch(() => {})
+  }
+}
+
 function playSong(item) {
-  // 统一数据源
   const isFullSong = !!(item.url || item.singerId !== undefined)
   const song = isFullSong ? item : {
     id: item.resourceId || item.id,
@@ -49,7 +67,9 @@ function playSong(item) {
       isPlaying.value = false
       window.dispatchEvent(new CustomEvent('play-state', { detail: { playing: false, songId: currentSong.value?.id } }))
     } else {
-      audioInstance?.play().catch(() => {})
+      audioInstance?.play().then(() => {
+        onPlayStarted(song.id)
+      }).catch(() => {})
       isPlaying.value = true
       window.dispatchEvent(new CustomEvent('play-state', { detail: { playing: true, songId: currentSong.value?.id } }))
     }
@@ -78,7 +98,9 @@ function playSong(item) {
     }
     audioInstance.onloadedmetadata = () => { duration.value = audioInstance.duration }
     audioInstance.onended = () => { isPlaying.value = false; progress.value = 0; currentTime.value = 0; window.dispatchEvent(new CustomEvent('play-state', { detail: { playing: false, songId: currentSong.value?.id } })) }
-    audioInstance.play().catch((err) => {
+    audioInstance.play().then(() => {
+      onPlayStarted(song.id)
+    }).catch((err) => {
       console.error('播放失败:', err)
       isPlaying.value = false
     })
@@ -99,7 +121,9 @@ function togglePlay() {
     isPlaying.value = false
     window.dispatchEvent(new CustomEvent('play-state', { detail: { playing: false, songId: currentSong.value?.id } }))
   } else {
-    audioInstance.play().catch(() => {})
+    audioInstance.play().then(() => {
+      onPlayStarted(currentSong.value?.id)
+    }).catch(() => {})
     isPlaying.value = true
     window.dispatchEvent(new CustomEvent('play-state', { detail: { playing: true, songId: currentSong.value?.id } }))
   }
@@ -257,11 +281,10 @@ $text-light: #94a3b8;
   transition: all 0.3s;
   flex-shrink: 0;
 
-
-.player-icon {
-  fill: currentColor;
-  stroke: none;
-}
+  .player-icon {
+    fill: currentColor;
+    stroke: none;
+  }
 
   &:hover {
     transform: scale(1.08);
@@ -310,5 +333,3 @@ $text-light: #94a3b8;
   color: $text-light;
 }
 </style>
-
-

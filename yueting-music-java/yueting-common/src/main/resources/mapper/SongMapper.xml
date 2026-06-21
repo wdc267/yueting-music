@@ -51,4 +51,14 @@
     <if test="sortOrder != null">sort_order = #{sortOrder},</if>
   </set> WHERE id = #{id}</update>
   <delete id="deleteById">DELETE FROM song WHERE id = #{id}</delete>
+
+  <update id="incrLikeCount">
+    UPDATE song SET like_count = GREATEST(0, like_count + #{delta}) WHERE id = #{id}
+  </update>
+  <update id="incrFavCount">
+    UPDATE song SET fav_count = GREATEST(0, fav_count + #{delta}) WHERE id = #{id}
+  </update>
+  <update id="incrPlayCount">
+    UPDATE song SET play_count = play_count + 1 WHERE id = #{id}
+  </update>
 </mapper>

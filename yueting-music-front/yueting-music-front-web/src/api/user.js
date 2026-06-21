@@ -57,3 +57,7 @@ export function getFavoritePlaylists(userId) {
 export function getFavoriteSingers(userId) {
   return request.get('/web/user/favorite/singers', { params: { userId } })
 }
+// 播放记录
+export function recordPlay(songId, userId) {
+  return request.post('/web/user/play/record', null, { params: { songId, userId } })
+}

@@ -45,6 +45,7 @@ public class UserActionServiceImpl implements UserActionService {
     UserLike exist = userLikeMapper.selectByUserAndResource(dto.getUserId(), dto.getResourceType(), dto.getResourceId());
     if (exist != null) {
       userLikeMapper.deleteByUserAndResource(dto.getUserId(), dto.getResourceType(), dto.getResourceId());
+      updateResourceLikeCount(dto.getResourceType(), dto.getResourceId(), -1);
       return false;
     } else {
       UserLike like = new UserLike();
@@ -52,6 +53,7 @@ public class UserActionServiceImpl implements UserActionService {
       like.setResourceType(dto.getResourceType());
       like.setResourceId(dto.getResourceId());
       userLikeMapper.insert(like);
+      updateResourceLikeCount(dto.getResourceType(), dto.getResourceId(), 1);
       return true;
     }
   }
@@ -63,6 +65,7 @@ public class UserActionServiceImpl implements UserActionService {
     UserFavorite exist = userFavoriteMapper.selectByUserAndResource(dto.getUserId(), dto.getResourceType(), dto.getResourceId());
     if (exist != null) {
       userFavoriteMapper.deleteByUserAndResource(dto.getUserId(), dto.getResourceType(), dto.getResourceId());
+      updateResourceFavCount(dto.getResourceType(), dto.getResourceId(), -1);
       return false;
     } else {
       UserFavorite fav = new UserFavorite();
@@ -70,13 +73,37 @@ public class UserActionServiceImpl implements UserActionService {
       fav.setResourceType(dto.getResourceType());
       fav.setResourceId(dto.getResourceId());
       userFavoriteMapper.insert(fav);
+      updateResourceFavCount(dto.getResourceType(), dto.getResourceId(), 1);
       return true;
+    }
+  }
+
+  private void updateResourceLikeCount(String resourceType, Long resourceId, int delta) {
+    if ("song".equals(resourceType)) {
+      songMapper.incrLikeCount(resourceId, delta);
+    }
+  }
+
+  private void updateResourceFavCount(String resourceType, Long resourceId, int delta) {
+    if ("song".equals(resourceType)) {
+      songMapper.incrFavCount(resourceId, delta);
     }
   }
 
   @Override public int getFavoriteCount(String resourceType, Long resourceId) { return userFavoriteMapper.countByResource(resourceType, resourceId); }
   @Override public boolean hasLiked(Long userId, String resourceType, Long resourceId) { return userLikeMapper.selectByUserAndResource(userId, resourceType, resourceId) != null; }
   @Override public boolean hasFavorited(Long userId, String resourceType, Long resourceId) { return userFavoriteMapper.selectByUserAndResource(userId, resourceType, resourceId) != null; }
+
+  @Override
+  public void recordPlay(Long songId, Long userId) {
+    songMapper.incrPlayCount(songId);
+    if (userId != null) {
+      UserPlayHistory history = new UserPlayHistory();
+      history.setUserId(userId);
+      history.setSongId(songId);
+      userPlayHistoryMapper.insert(history);
+    }
+  }
 
   @Override
   public UserProfileVO getProfile(Long userId) {

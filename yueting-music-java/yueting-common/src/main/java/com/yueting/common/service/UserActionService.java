@@ -21,4 +21,5 @@ public interface UserActionService {
   List<SongVO> getFavoriteSongs(Long userId);
   List<PlaylistVO> getFavoritePlaylists(Long userId);
   List<SingerVO> getFavoriteSingers(Long userId);
+  void recordPlay(Long songId, Long userId);
 }

@@ -50,6 +50,12 @@ public class UserActionController {
     return Result.success(userActionService.hasFavorited(userId, resourceType, resourceId));
   }
 
+  @PostMapping("/play/record")
+  public Result<Void> recordPlay(@RequestParam Long songId, @RequestParam(required = false) Long userId) {
+    userActionService.recordPlay(songId, userId);
+    return Result.success();
+  }
+
   @GetMapping("/liked/songs")
   public Result<List<SongVO>> getLikedSongs(@RequestParam Long userId) {
     return Result.success(userActionService.getLikedSongs(userId));

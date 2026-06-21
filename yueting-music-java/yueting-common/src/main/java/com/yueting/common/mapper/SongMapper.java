@@ -12,4 +12,7 @@ public interface SongMapper {
   int update(Song song);
   int deleteById(@Param("id") Long id);
   List<Song> selectEnabledList();
+  int incrLikeCount(@Param("id") Long id, @Param("delta") int delta);
+  int incrFavCount(@Param("id") Long id, @Param("delta") int delta);
+  int incrPlayCount(@Param("id") Long id);
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yueting.common.mapper.DashboardMapper">
+  <select id="statistics" resultType="com.yueting.entity.vo.DashboardVO">
+    SELECT
+      (SELECT COUNT(*) FROM song WHERE status = 1) AS songCount,
+      (SELECT COUNT(*) FROM singer WHERE status = 1) AS singerCount,
+      (SELECT COUNT(*) FROM playlist WHERE status = 1) AS playlistCount,
+      (SELECT COUNT(*) FROM user_info) AS userCount,
+      COALESCE((SELECT SUM(play_count) FROM song WHERE status = 1), 0) AS totalPlayCount,
+      COALESCE((SELECT SUM(like_count) FROM song WHERE status = 1), 0) AS totalLikeCount,
+      COALESCE((SELECT SUM(fav_count) FROM song WHERE status = 1), 0) AS totalFavCount
+  </select>
+
+  <select id="topSongs" resultType="com.yueting.entity.vo.DashboardItemVO">
+    SELECT s.id, s.name, s.cover, si.name AS singerName,
+      COALESCE(s.play_count, 0) AS playCount,
+      COALESCE(s.like_count, 0) AS likeCount,
+      COALESCE(s.fav_count, 0) AS favCount
+    FROM song s LEFT JOIN singer si ON s.singer_id = si.id
+    WHERE s.status = 1
+    ORDER BY s.play_count DESC, s.like_count DESC, s.fav_count DESC
+    LIMIT 10
+  </select>
+
+  <select id="topSingers" resultType="com.yueting.entity.vo.DashboardItemVO">
+    SELECT si.id, si.name, si.avatar AS cover, NULL AS singerName,
+      COALESCE(SUM(s.play_count), 0) AS playCount,
+      COALESCE(SUM(s.like_count), 0) AS likeCount,
+      COALESCE(SUM(s.fav_count), 0) AS favCount
+    FROM singer si LEFT JOIN song s ON s.singer_id = si.id AND s.status = 1
+    WHERE si.status = 1
+    GROUP BY si.id, si.name, si.avatar
+    ORDER BY playCount DESC, likeCount DESC, favCount DESC
+    LIMIT 10
+  </select>
+
+  <select id="topPlaylists" resultType="com.yueting.entity.vo.DashboardItemVO">
+    SELECT p.id, p.name, p.cover, NULL AS singerName,
+      COALESCE(SUM(s.play_count), 0) AS playCount,
+      COALESCE(SUM(s.like_count), 0) AS likeCount,
+      COALESCE(SUM(s.fav_count), 0) AS favCount
+    FROM playlist p
+    LEFT JOIN playlist_song ps ON ps.playlist_id = p.id
+    LEFT JOIN song s ON s.id = ps.song_id AND s.status = 1
+    WHERE p.status = 1
+    GROUP BY p.id, p.name, p.cover
+    ORDER BY playCount DESC, likeCount DESC, favCount DESC
+    LIMIT 10
+  </select>
+</mapper>
