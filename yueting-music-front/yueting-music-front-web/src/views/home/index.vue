@@ -139,11 +139,7 @@ onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
           <el-carousel-item v-for="item in banners" :key="item.id">
             <div class="banner-card" @click="handleTodayClick(item)">
               <img :src="getCover(item)" :alt="item.title" class="banner-cover" @error="handleImageError($event)" />
-              <div class="banner-overlay">
-                <span class="banner-tag">{{ resourceTypeIcons[item.resourceType] }} {{ resourceTypeLabels[item.resourceType] }}</span>
-                <h2 class="banner-title">{{ item.title }}</h2>
-                <p class="banner-subtitle" v-if="item.resourceName">{{ item.resourceName }}</p>
-              </div>
+              <div class="banner-overlay"><span class="banner-tag">{{ resourceTypeIcons[item.resourceType] }} {{ resourceTypeLabels[item.resourceType] }}</span><h2 class="banner-title">{{ item.title }}</h2><p class="banner-subtitle" v-if="item.resourceName">{{ item.resourceName }}</p></div>
             </div>
           </el-carousel-item>
         </el-carousel>
@@ -185,7 +181,7 @@ onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
             </div>
             <div class="card-actions" @click.stop>
               <button class="action-btn-sm" :class="{ active: favoritedMap['playlist-' + item.id] }" @click="handleFavorite(item, 'playlist')" title="收藏">
-                {{ favoritedMap['playlist-' + item.id] ? '⭐' : '☆' }}
+                {{ favoritedMap['playlist-' + item.id] ? '🌟' : '☆' }}
               </button>
             </div>
           </div>
@@ -206,7 +202,7 @@ onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
             <p class="singer-region" v-if="item.region">{{ item.region }}</p>
             <div class="singer-actions" @click.stop>
               <button class="action-btn-sm" :class="{ active: favoritedMap['singer-' + item.id] }" @click="handleFavorite(item, 'singer')" title="收藏">
-                {{ favoritedMap['singer-' + item.id] ? '⭐' : '☆' }}
+                {{ favoritedMap['singer-' + item.id] ? '🌟' : '☆' }}
               </button>
             </div>
           </div>
@@ -232,11 +228,11 @@ onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
               <span v-if="item.favCount">⭐ {{ formatCount(item.favCount) }}</span>
             </div>
             <div class="song-actions" @click.stop>
-              <button class="action-btn" :class="{ active: likedMap['song-' + item.id] }" @click="handleLike(item, 'song')" title="点赞">
-                {{ likedMap['song-' + item.id] ? '❤️' : '🤍' }}
+              <button class="action-btn action-btn-like" :class="{ active: likedMap['song-' + item.id] }" @click="handleLike(item, 'song')" title="点赞">
+                {{ likedMap['song-' + item.id] ? '💕' : '🤍' }}
               </button>
-              <button class="action-btn" :class="{ active: favoritedMap['song-' + item.id] }" @click="handleFavorite(item, 'song')" title="收藏">
-                {{ favoritedMap['song-' + item.id] ? '⭐' : '☆' }}
+              <button class="action-btn action-btn-fav" :class="{ active: favoritedMap['song-' + item.id] }" @click="handleFavorite(item, 'song')" title="收藏">
+                {{ favoritedMap['song-' + item.id] ? '🌟' : '☆' }}
               </button>
             </div>
           </div>
@@ -252,90 +248,273 @@ onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+/* ========== 二次元轻快明亮主题 ========== */
+$c-pink: #ff85a2;
+$c-blue: #60a5fa;
+$c-purple: #c084fc;
+$c-cyan: #67e8f9;
+$c-yellow: #facc15;
+$c-mint: #6ee7b7;
+$c-coral: #fb7185;
+$bg-page: linear-gradient(180deg, #f0f9ff 0%, #fdf2f8 50%, #faf5ff 100%);
+$bg-card: rgba(255,255,255,0.85);
+$bg-card-hover: rgba(255,255,255,0.95);
+$shadow-card: 0 4px 20px rgba(148, 163, 184, 0.12);
+$shadow-hover: 0 12px 36px rgba(148, 163, 184, 0.18);
+$radius-lg: 20px;
+$radius-md: 14px;
+$radius-sm: 10px;
 
-.home-page { min-height: 100vh; background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%); }
+.home-page {
+  min-height: 100vh;
+  background: $bg-page;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
 
-.top-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(59,130,246,0.08); position: sticky; top: 0; z-index: 100; padding: 0 24px; }
+/* 顶部导航 */
+.top-header {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(196, 164, 252, 0.15);
+  position: sticky; top: 0; z-index: 100; padding: 0 24px;
+}
 .header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .logo-area { display: flex; align-items: center; gap: 8px; }
-.logo-icon { font-size: 24px; }
-.logo-text { font-size: 20px; font-weight: 700; color: #3b82f6; letter-spacing: 2px; }
+.logo-icon { font-size: 26px; filter: drop-shadow(0 2px 4px rgba(196, 164, 252, 0.4)); animation: logoBounce 2s ease-in-out infinite; }
+@keyframes logoBounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+.logo-text {
+  font-size: 22px; font-weight: 800;
+  background: linear-gradient(135deg, #ff85a2, #c084fc);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 3px;
+}
 .header-nav { display: flex; gap: 28px; }
-.nav-link { font-size: 15px; color: #1e293b; text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; transition: all 0.2s; }
-.nav-link:hover, .nav-link.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+.nav-link {
+  font-size: 15px; color: #64748b; text-decoration: none; padding: 4px 0;
+  position: relative; transition: all 0.3s;
+}
+.nav-link::after {
+  content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 2.5px; border-radius: 2px;
+  background: linear-gradient(90deg, $c-pink, $c-purple);
+  transition: width 0.3s ease;
+}
+.nav-link:hover, .nav-link.active { color: $c-purple; }
+.nav-link:hover::after, .nav-link.active::after { width: 100%; }
 .header-actions { display: flex; align-items: center; gap: 14px; }
 .user-info-group { display: flex; align-items: center; gap: 14px; }
-.user-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #1e293b; }
-.user-avatar-mini { width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
-.user-name { font-size: 14px; }
-.logout-link { font-size: 13px; color: #94a3b8; text-decoration: none; }
-.logout-link:hover { color: #3b82f6; }
-.login-btn { padding: 6px 20px; border-radius: 20px; background: #3b82f6; color: #fff; font-size: 14px; text-decoration: none; transition: all 0.2s; }
-.login-btn:hover { background: #2563eb; }
+.user-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; }
+.user-avatar-mini { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #ff85a2, #c084fc); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; box-shadow: 0 2px 8px rgba(196, 164, 252, 0.35); }
+.user-name { font-size: 14px; font-weight: 500; }
+.logout-link { font-size: 13px; color: #94a3b8; text-decoration: none; transition: color 0.2s; }
+.logout-link:hover { color: $c-coral; }
+.login-btn {
+  padding: 7px 22px; border-radius: 22px;
+  background: linear-gradient(135deg, #ff85a2, #c084fc);
+  color: #fff; font-size: 14px; font-weight: 600; text-decoration: none;
+  transition: all 0.3s; box-shadow: 0 4px 14px rgba(196, 164, 252, 0.3);
+}
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196, 164, 252, 0.45); }
 
-.page-content { max-width: 1280px; margin: 0 auto; padding: 24px 24px 32px; }
-.section { margin-bottom: 32px; }
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.section-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; }
-.section-more { font-size: 13px; color: #94a3b8; text-decoration: none; }
-.section-more:hover { color: #3b82f6; }
+/* 页面内容 */
+.page-content { max-width: 1280px; margin: 0 auto; padding: 28px 24px 40px; }
+.section { margin-bottom: 36px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.section-title {
+  font-size: 22px; font-weight: 800; margin: 0;
+  background: linear-gradient(135deg, #ff85a2, #c084fc);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.section-more {
+  font-size: 13px; color: #a78bfa; text-decoration: none; font-weight: 500;
+  transition: all 0.2s; padding: 4px 12px; border-radius: 14px;
+  background: rgba(196, 164, 252, 0.08);
+}
+.section-more:hover { background: rgba(196, 164, 252, 0.18); color: #7c3aed; }
 
-.banner-carousel :deep(.el-carousel__container) { border-radius: 16px; overflow: hidden; }
-.banner-carousel :deep(.el-carousel__arrow) { background: rgba(255,255,255,0.2); color: #fff; }
-.banner-carousel :deep(.el-carousel__arrow:hover) { background: rgba(255,255,255,0.4); }
-.banner-carousel :deep(.el-carousel__button) { background: rgba(255,255,255,0.5); width: 28px; height: 4px; border-radius: 2px; }
-.banner-carousel :deep(.is-active .el-carousel__button) { background: #fff; width: 44px; }
-
+/* 轮播图 */
+.banner-carousel :deep(.el-carousel__container) { border-radius: 20px; overflow: hidden; }
+.banner-carousel :deep(.el-carousel__arrow) { background: rgba(255,255,255,0.25); color: #fff; border-radius: 50%; width: 40px; height: 40px; }
+.banner-carousel :deep(.el-carousel__arrow:hover) { background: rgba(255,255,255,0.5); }
+.banner-carousel :deep(.el-carousel__button) { background: rgba(255,255,255,0.5); width: 32px; height: 5px; border-radius: 3px; }
+.banner-carousel :deep(.is-active .el-carousel__button) { background: #fff; width: 48px; }
 .banner-card { height: 100%; cursor: pointer; position: relative; overflow: hidden; }
 .banner-card:hover .banner-cover { transform: scale(1.06); }
 .banner-cover { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-.banner-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 50px 32px 28px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: #fff; }
-.banner-tag { display: inline-block; padding: 3px 14px; border-radius: 14px; font-size: 12px; margin-bottom: 8px; backdrop-filter: blur(4px); background: rgba(59,130,246,0.5); }
-.banner-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-.banner-subtitle { font-size: 0.95rem; opacity: 0.85; }
+.banner-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 60px 32px 28px;
+  background: none;
+  color: #fff;
+  pointer-events: none;
+}
+.banner-tag {
+  display: inline-block; padding: 4px 16px; border-radius: 16px;
+  font-size: 12px; font-weight: 600; margin-bottom: 10px;
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.banner-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.banner-subtitle { font-size: 0.95rem; opacity: 0.9; }
 
+/* 今日推荐 - 紧凑卡片 */
 .today-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-.today-card { background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 12px rgba(59, 130, 246, 0.08); }
-.today-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08); }
-.today-card:hover .card-img { transform: scale(1.06); }
+.today-card {
+  background: $bg-card; backdrop-filter: blur(12px);
+  border-radius: $radius-md; overflow: hidden; cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: $shadow-card; border: 1px solid rgba(196, 164, 252, 0.1);
+}
+.today-card:hover {
+  transform: translateY(-6px); box-shadow: $shadow-hover;
+  border-color: rgba(196, 164, 252, 0.3);
+}
+.today-card:hover .card-img { transform: scale(1.08); }
 
+/* 推荐歌单卡片 */
 .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
-.card { background: #fff; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 12px rgba(59, 130, 246, 0.08); }
-.card:hover { transform: translateY(-6px); box-shadow: 0 8px 30px rgba(59, 130, 246, 0.08); }
-.card:hover .card-img { transform: scale(1.08); }
+.card {
+  background: $bg-card; backdrop-filter: blur(12px);
+  border-radius: $radius-lg; overflow: hidden; cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: $shadow-card; border: 1px solid rgba(196, 164, 252, 0.1);
+  position: relative;
+}
+.card:hover {
+  transform: translateY(-8px); box-shadow: $shadow-hover;
+  border-color: rgba(196, 164, 252, 0.3);
+}
+.card:hover .card-img { transform: scale(1.1); }
 
-.card-img-wrap { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: #f0f4ff; }
-.card-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.card-tag { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 10px; font-size: 11px; color: #fff; backdrop-filter: blur(4px); background: rgba(59,130,246,0.6); }
-.card-count { position: absolute; bottom: 8px; right: 10px; font-size: 11px; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 10px; border-radius: 10px; backdrop-filter: blur(2px); }
-.card-body { padding: 10px 14px 14px; }
-.card-title { font-size: 14px; font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-img-wrap { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: linear-gradient(135deg, #ff85a2, #c084fc); }
+.card-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.card-tag {
+  position: absolute; top: 10px; left: 10px;
+  padding: 4px 12px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; color: #fff;
+  backdrop-filter: blur(6px);
+  background: rgba(196, 164, 252, 0.7);
+}
+.card-count {
+  position: absolute; bottom: 8px; right: 10px;
+  font-size: 11px; color: #fff;
+  background: rgba(196, 132, 252, 0.7);
+  padding: 3px 12px; border-radius: 12px; backdrop-filter: blur(4px);
+}
+.card-body { padding: 12px 14px 8px; }
+.card-title { font-size: 14px; font-weight: 700; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-desc { font-size: 12px; color: #94a3b8; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.singer-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
-.singer-card { text-align: center; cursor: pointer; transition: all 0.3s ease; }
-.singer-card:hover { transform: translateY(-6px); }
-.singer-card:hover .singer-avatar { transform: scale(1.1); }
-.singer-avatar-wrap { width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px; box-shadow: 0 4px 16px rgba(59, 130, 246, 0.08); border: 3px solid #fff; }
-.singer-avatar { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; border-radius: 50%; }
-.singer-name { font-size: 14px; font-weight: 600; color: #1e293b; }
-.singer-region { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+/* ========== 二次元风格按钮 ========== */
 
-.song-list { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(59, 130, 246, 0.08); }
-.song-item { display: flex; align-items: center; padding: 10px 20px; cursor: pointer; transition: all 0.2s; border-bottom: 1px solid #f1f5f9; }
+/* 歌曲行的操作按钮 */
+.song-actions {
+  display: flex; gap: 6px; margin-left: 8px;
+}
+.action-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: none; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; overflow: hidden;
+}
+/* 点赞按钮 */
+.action-btn-like {
+  background: transparent !important;
+  color: #94a3b8;
+  box-shadow: none !important;
+}
+.action-btn-like:hover { color: #fb7185; transform: scale(1.2); background: transparent !important; box-shadow: none !important; }
+.action-btn-like.active { color: #fb7185; background: transparent !important; box-shadow: none !important; animation: heartBeat 0.6s ease; }
+@keyframes heartBeat { 0% { transform: scale(1) } 25% { transform: scale(1.3) } 50% { transform: scale(0.95) } 100% { transform: scale(1) } }
+
+/* 收藏按钮 */
+.action-btn-fav {
+  background: transparent !important;
+  color: #94a3b8;
+  box-shadow: none !important;
+}
+.action-btn-fav:hover { color: #facc15; transform: scale(1.2); background: transparent !important; box-shadow: none !important; }
+.action-btn-fav.active { color: #facc15; background: transparent !important; box-shadow: none !important; animation: starPop 0.5s ease; }
+@keyframes starPop { 0% { transform: scale(1) rotate(0deg) } 50% { transform: scale(1.4) rotate(15deg) } 100% { transform: scale(1) rotate(0deg) } }
+
+/* 卡片内的收藏按钮（歌单/歌手卡片左下角） */
+.card-actions, .singer-actions { position: absolute; bottom: 10px; right: 10px; z-index: 5;
+  display: flex; gap: 6px;
+}
+.action-btn-sm {
+  border: none; cursor: pointer; font-size: 15px;
+  padding: 2px; outline: none;
+  background: transparent; color: #94a3b8;
+  transition: all 0.3s ease;
+}
+.action-btn-sm:hover { color: #facc15; transform: scale(1.25); background: transparent; }
+.card .action-btn-sm.active { color: #facc15; background: transparent; }
+
+/* 卡片内收藏 - 歌手 */
+.singer-card .action-btn-sm {
+  border: none; cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: #94a3b8;
+  padding: 2px;
+  outline: none;
+}
+.singer-card .action-btn-sm:hover { color: #facc15; transform: scale(1.25); background: transparent; }
+.singer-card .action-btn-sm.active { color: #facc15; background: transparent; }
+
+/* 歌手区域 */
+.singer-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.singer-card {
+  text-align: center; cursor: pointer; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  background: $bg-card; backdrop-filter: blur(12px);
+  border-radius: $radius-lg; padding: 20px 12px 16px;
+  box-shadow: $shadow-card; border: 1px solid rgba(196, 164, 252, 0.1);
+  position: relative;
+}
+.singer-card:hover {
+  transform: translateY(-8px); box-shadow: $shadow-hover;
+  border-color: rgba(196, 164, 252, 0.3);
+}
+.singer-card:hover .singer-avatar { transform: scale(1.1); }
+.singer-avatar-wrap {
+  width: 100px; height: 100px; border-radius: 50%; overflow: hidden;
+  margin: 0 auto 12px;
+  box-shadow: 0 6px 20px rgba(196, 164, 252, 0.25);
+  border: 3px solid rgba(255,255,255,0.8);
+}
+.singer-avatar { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; border-radius: 50%; }
+.singer-name { font-size: 14px; font-weight: 700; color: #334155; }
+.singer-region { font-size: 12px; color: #a78bfa; margin-top: 4px; font-weight: 500; }
+
+/* 歌曲列表 */
+.song-list {
+  background: $bg-card; backdrop-filter: blur(12px);
+  border-radius: $radius-lg; overflow: hidden;
+  box-shadow: $shadow-card; border: 1px solid rgba(196, 164, 252, 0.1);
+}
+.song-item {
+  display: flex; align-items: center; padding: 12px 20px; cursor: pointer;
+  transition: all 0.25s ease; border-bottom: 1px solid rgba(196, 164, 252, 0.08);
+}
 .song-item:last-child { border-bottom: none; }
-.song-item:hover { background: rgba(59,130,246,0.04); }
-.song-index { width: 30px; font-size: 14px; font-weight: 600; color: #94a3b8; text-align: center; }
-.song-index.top3 { color: #3b82f6; font-size: 16px; }
-.song-cover { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; margin: 0 12px; }
+.song-item:hover { background: rgba(196, 164, 252, 0.06); }
+.song-index { width: 30px; font-size: 14px; font-weight: 700; color: #c4b5fd; text-align: center; }
+.song-index.top3 { color: #a78bfa; font-size: 16px; }
+.song-cover { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; margin: 0 12px; }
 .song-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.song-name { font-size: 14px; font-weight: 500; color: #1e293b; }
+.song-name { font-size: 14px; font-weight: 600; color: #334155; }
 .song-artist { font-size: 12px; color: #94a3b8; }
 .song-stats { display: flex; gap: 14px; margin-right: 12px; }
-.song-stats span { font-size: 12px; color: #94a3b8; }
+.song-stats span { font-size: 12px; color: #a78bfa; font-weight: 500; }
 
-.page-footer { text-align: center; padding: 32px 20px; font-size: 13px; color: #94a3b8; }
+.page-footer { text-align: center; padding: 36px 20px; font-size: 13px; color: #a78bfa; font-weight: 500; }
 
 @media (max-width: 992px) {
   .today-grid, .card-grid { grid-template-columns: repeat(3, 1fr); }
@@ -346,5 +525,5 @@ onMounted(() => { fetchData(); setTimeout(loadUserStatus, 200) })
   .singer-grid { grid-template-columns: repeat(2, 1fr); }
   .header-nav { display: none; }
 }
-
 </style>
+
